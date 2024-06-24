@@ -1,21 +1,27 @@
-import {Suspense, lazy} from "react";
-import waiting from "./waiting";
+import React from 'react';
+import { Route, Routes } from 'react-router-dom';
+import ProtectedRoute from './Components/ProtectedRoute';
+import { routes } from './roles-and-routes/routes';
+import NotFoundComponent from './Components/NotFoundComponent';
+import Redirect from './Components/Redirect';
 
-const MyComponent = lazy(async()=>{
-  await waiting(1000);
-  return import('./lazyLoadedComponent');
-})
-
-function App(){
+const App = () => {
   return (
-    <div>
-      <h1>Welcome to My App</h1>
-      {/* Use Suspense to show a fallback while MyComponent is loading */}
-      <Suspense fallback={<div><h1>Loading...</h1></div>}>
-        <MyComponent />
-      </Suspense>
-    </div>
-  );
+    <Routes>
+      {routes.map(route => (
+        <Route 
+          key={route.path}
+          path={route.path}
+          element={<ProtectedRoute 
+            component={route.component}
+            allowedRoles={route.allowedRoles}
+          />}
+        />
+      ))}
+      <Route path="/" element={<Redirect toUrl="/dashboard" />} />
+      <Route path="*" element={<NotFoundComponent />} />
+    </Routes>
+  )
 }
 
 export default App;
